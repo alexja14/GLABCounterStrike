@@ -2,7 +2,7 @@ import './style.css';
 
 // ===== DATA LOADING =====
 async function loadMatchData() {
-  const res = await fetch('/data/matches.json');
+  const res = await fetch(import.meta.env.BASE_URL + 'data/matches.json');
   return await res.json();
 }
 
