@@ -54,6 +54,12 @@ function computeLeaderboard(data) {
 // ===== RENDERING: PODIUM =====
 function renderPodium(leaderboard) {
   const container = document.getElementById('top-three');
+
+  if (leaderboard.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-display);letter-spacing:2px;">No matches played yet — come back tonight! 🎮</div>`;
+    return;
+  }
+
   const medals = ['gold', 'silver', 'bronze'];
   const rankLabels = ['1°', '2°', '3°'];
 
@@ -113,16 +119,24 @@ function renderGlobalStats(data) {
   const container = document.getElementById('global-stats');
   const totalMatches = data.matches.length;
   const totalPlayers = data.players.length;
+  const season = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   container.innerHTML = `
     <div class="pill">Matches: <strong>${totalMatches}</strong></div>
     <div class="pill">Players: <strong>${totalPlayers}</strong></div>
+    <div class="pill">Season: <strong>${season}</strong></div>
   `;
 }
 
 // ===== RENDERING: MATCHES =====
 function renderMatches(data) {
   const container = document.getElementById('matches-list');
+
+  if (data.matches.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);font-family:var(--font-display);letter-spacing:2px;">No matches recorded yet.<br><br>Add your first match to <code style="color:var(--neon-cyan)">public/data/matches.json</code> 🕹️</div>`;
+    return;
+  }
+
   // Show most recent first
   const sorted = [...data.matches].sort((a, b) => new Date(b.date) - new Date(a.date));
 
@@ -169,6 +183,11 @@ function renderMatches(data) {
 // ===== RENDERING: STATS PAGE =====
 function renderStats(data, leaderboard) {
   const container = document.getElementById('stats-content');
+
+  if (data.matches.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-muted);font-family:var(--font-display);letter-spacing:2px;">Stats will appear here once matches are played. 📊</div>`;
+    return;
+  }
 
   // Map frequency
   const mapCount = {};

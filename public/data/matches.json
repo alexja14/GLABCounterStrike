@@ -1,76 +1,10 @@
 {
   "players": [
-    "Marco",
-    "Luca",
-    "Andrea",
-    "Giulio",
-    "Davide",
-    "Matteo",
-    "Simone",
-    "Federico",
-    "Alessandro",
-    "Tommaso"
+    "Dagles",
+    "Paduraru",
+    "Jabba",
+    "Charlie",
+    "Nort0N"
   ],
-  "matches": [
-    {
-      "id": 1,
-      "date": "2026-03-06",
-      "map": "Dust2",
-      "team1": {
-        "name": "Team Alpha",
-        "players": ["Marco", "Luca", "Andrea", "Giulio", "Davide"],
-        "score": 16
-      },
-      "team2": {
-        "name": "Team Bravo",
-        "players": ["Matteo", "Simone", "Federico", "Alessandro", "Tommaso"],
-        "score": 12
-      }
-    },
-    {
-      "id": 2,
-      "date": "2026-03-13",
-      "map": "Mirage",
-      "team1": {
-        "name": "Team Alpha",
-        "players": ["Marco", "Simone", "Andrea", "Alessandro", "Davide"],
-        "score": 13
-      },
-      "team2": {
-        "name": "Team Bravo",
-        "players": ["Matteo", "Luca", "Federico", "Giulio", "Tommaso"],
-        "score": 9
-      }
-    },
-    {
-      "id": 3,
-      "date": "2026-03-20",
-      "map": "Inferno",
-      "team1": {
-        "name": "Team Alpha",
-        "players": ["Marco", "Luca", "Federico", "Giulio", "Tommaso"],
-        "score": 10
-      },
-      "team2": {
-        "name": "Team Bravo",
-        "players": ["Matteo", "Simone", "Andrea", "Alessandro", "Davide"],
-        "score": 16
-      }
-    },
-    {
-      "id": 4,
-      "date": "2026-03-27",
-      "map": "Nuke",
-      "team1": {
-        "name": "Team Alpha",
-        "players": ["Andrea", "Luca", "Simone", "Giulio", "Tommaso"],
-        "score": 16
-      },
-      "team2": {
-        "name": "Team Bravo",
-        "players": ["Marco", "Matteo", "Federico", "Alessandro", "Davide"],
-        "score": 14
-      }
-    }
-  ]
+  "matches": []
 }
