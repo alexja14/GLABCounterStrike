@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GLAB CS Leaderboard — Classifica Settimanale</title>
-    <meta name="description" content="Classifica settimanale delle partite Counter-Strike del gruppo GLAB" />
+    <title>GLAB CS Leaderboard — Weekly Rankings</title>
+    <meta name="description" content="Weekly Counter-Strike match leaderboard for the GLAB group" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -20,13 +20,13 @@
           <div class="logo-icon">⚔</div>
           <div class="logo-text">
             <h1>GLAB <span class="accent">CS</span></h1>
-            <p class="tagline">Classifica Settimanale</p>
+            <p class="tagline">Weekly Leaderboard</p>
           </div>
         </div>
         <nav class="header-nav">
-          <button class="nav-btn active" data-section="leaderboard" id="nav-leaderboard">🏆 Classifica</button>
-          <button class="nav-btn" data-section="matches" id="nav-matches">📋 Partite</button>
-          <button class="nav-btn" data-section="stats" id="nav-stats">📊 Statistiche</button>
+          <button class="nav-btn active" data-section="leaderboard" id="nav-leaderboard">🏆 Leaderboard</button>
+          <button class="nav-btn" data-section="matches" id="nav-matches">📋 Matches</button>
+          <button class="nav-btn" data-section="stats" id="nav-stats">📊 Statistics</button>
         </nav>
       </div>
     </header>
@@ -35,7 +35,7 @@
       <!-- Leaderboard Section -->
       <section id="section-leaderboard" class="section active">
         <div class="section-header">
-          <h2><span class="accent">#</span> Classifica Generale</h2>
+          <h2><span class="accent">#</span> Overall Standings</h2>
           <div class="stats-pills" id="global-stats"></div>
         </div>
         <div class="leaderboard-container">
@@ -45,10 +45,10 @@
               <thead>
                 <tr>
                   <th>Pos</th>
-                  <th>Giocatore</th>
+                  <th>Player</th>
                   <th>W</th>
                   <th>L</th>
-                  <th>Partite</th>
+                  <th>GP</th>
                   <th>Win%</th>
                   <th>Round W</th>
                   <th>Round L</th>
@@ -64,7 +64,7 @@
       <!-- Matches Section -->
       <section id="section-matches" class="section">
         <div class="section-header">
-          <h2><span class="accent">#</span> Storico Partite</h2>
+          <h2><span class="accent">#</span> Match History</h2>
         </div>
         <div id="matches-list" class="matches-grid"></div>
       </section>
@@ -72,14 +72,14 @@
       <!-- Stats Section -->
       <section id="section-stats" class="section">
         <div class="section-header">
-          <h2><span class="accent">#</span> Statistiche</h2>
+          <h2><span class="accent">#</span> Statistics</h2>
         </div>
         <div id="stats-content" class="stats-grid"></div>
       </section>
     </main>
 
     <footer>
-      <p>GLAB Counter-Strike League &copy; 2026 — Dati aggiornati settimanalmente</p>
+      <p>GLAB Counter-Strike League &copy; 2026 — Data updated weekly</p>
     </footer>
 
     <script type="module" src="/src/main.js"></script>

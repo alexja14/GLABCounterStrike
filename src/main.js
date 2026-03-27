@@ -63,8 +63,8 @@ function renderPodium(leaderboard) {
       <div class="podium-avatar">${p.name.charAt(0).toUpperCase()}</div>
       <div>
         <div class="podium-name">${p.name}</div>
-        <div class="podium-winrate">${p.winRate.toFixed(0)}% Win</div>
-        <div class="podium-record">${p.wins}W - ${p.losses}L</div>
+        <div class="podium-winrate">${p.winRate.toFixed(0)}% Win Rate</div>
+        <div class="podium-record">${p.wins}W &ndash; ${p.losses}L</div>
       </div>
     </div>
   `).join('');
@@ -115,8 +115,8 @@ function renderGlobalStats(data) {
   const totalPlayers = data.players.length;
 
   container.innerHTML = `
-    <div class="pill">Partite:<strong>${totalMatches}</strong></div>
-    <div class="pill">Giocatori:<strong>${totalPlayers}</strong></div>
+    <div class="pill">Matches: <strong>${totalMatches}</strong></div>
+    <div class="pill">Players: <strong>${totalPlayers}</strong></div>
   `;
 }
 
@@ -131,7 +131,7 @@ function renderMatches(data) {
 
     const formatDate = (d) => {
       const date = new Date(d);
-      return date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     };
 
     return `
@@ -156,7 +156,7 @@ function renderMatches(data) {
             <div class="team-players-label">${match.team1.name}</div>
             ${match.team1.players.map(p => `<div class="team-player-name">${p}</div>`).join('')}
           </div>
-          <div class="team-players">
+          <div class="team-players" style="text-align:right">
             <div class="team-players-label">${match.team2.name}</div>
             ${match.team2.players.map(p => `<div class="team-player-name">${p}</div>`).join('')}
           </div>
@@ -209,32 +209,32 @@ function renderStats(data, leaderboard) {
 
   container.innerHTML = `
     <div class="stat-card">
-      <div class="stat-card-title">👑 Miglior Win Rate</div>
+      <div class="stat-card-title">👑 Best Win Rate</div>
       <div class="stat-card-value">${bestPlayer ? bestPlayer.winRate.toFixed(0) + '%' : '-'}</div>
       <div class="stat-card-sub">${bestPlayer ? bestPlayer.name + ' (' + bestPlayer.wins + 'W-' + bestPlayer.losses + 'L)' : ''}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-title">🔥 Miglior Streak</div>
+      <div class="stat-card-title">🔥 Best Win Streak</div>
       <div class="stat-card-value">${bestStreakPlayer ? bestStreakPlayer[1].best + 'W' : '-'}</div>
       <div class="stat-card-sub">${bestStreakPlayer ? bestStreakPlayer[0] : ''}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-title">📊 Round Totali</div>
+      <div class="stat-card-title">📊 Total Rounds</div>
       <div class="stat-card-value">${totalRounds}</div>
-      <div class="stat-card-sub">Media ${avgRounds} round/partita</div>
+      <div class="stat-card-sub">Avg ${avgRounds} rounds/match</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-title">⚡ Miglior Round Diff</div>
+      <div class="stat-card-title">⚡ Best Round Diff</div>
       <div class="stat-card-value">${bestRD ? (bestRD.roundDiff >= 0 ? '+' : '') + bestRD.roundDiff : '-'}</div>
       <div class="stat-card-sub">${bestRD ? bestRD.name : ''}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-title">🎮 Più Partite Giocate</div>
+      <div class="stat-card-title">🎮 Most Matches Played</div>
       <div class="stat-card-value">${mostMatches ? mostMatches.total : '-'}</div>
       <div class="stat-card-sub">${mostMatches ? mostMatches.name : ''}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-card-title">🗺️ Mappe Giocate</div>
+      <div class="stat-card-title">🗺️ Maps Played</div>
       <div class="stat-bar-list">
         ${Object.entries(mapCount)
           .sort((a, b) => b[1] - a[1])
@@ -312,11 +312,11 @@ async function init() {
     renderMatches(data);
     renderStats(data, leaderboard);
   } catch (err) {
-    console.error('Errore caricamento dati:', err);
+    console.error('Error loading data:', err);
     document.getElementById('app').innerHTML = `
       <div style="text-align:center;padding:4rem;color:var(--neon-red);">
-        <h2>Errore caricamento dati</h2>
-        <p>Assicurati che <code>public/data/matches.json</code> esista e sia valido.</p>
+        <h2>Error loading data</h2>
+        <p>Make sure <code>public/data/matches.json</code> exists and is valid.</p>
       </div>
     `;
   }
