@@ -592,6 +592,26 @@ tbody tr:hover {
 
 /* ===== STATS GRID ===== */
 .stats-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.stats-section-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+}
+
+.stats-standings {
+  width: 100%;
+}
+
+.stats-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;

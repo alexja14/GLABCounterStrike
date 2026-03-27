@@ -227,6 +227,41 @@ function renderStats(data, leaderboard) {
   const bestStreakPlayer = Object.entries(playerStreaks).sort((a, b) => b[1].best - a[1].best)[0];
 
   container.innerHTML = `
+    <div class="stats-standings">
+      <div class="stats-section-label">📋 Overall Standings</div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th><th>Player</th><th>W</th><th>L</th><th>GP</th><th>Win%</th><th>Round W</th><th>Round L</th><th>RD</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${leaderboard.map((p, i) => {
+              const pos = i + 1;
+              const posDisplay = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+              return `<tr>
+                <td style="text-align:center;font-family:var(--font-display);font-weight:700;color:var(--text-muted)">${posDisplay}</td>
+                <td class="player-name">${p.name}</td>
+                <td class="stat-win">${p.wins}</td>
+                <td class="stat-loss">${p.losses}</td>
+                <td class="stat-neutral">${p.total}</td>
+                <td>
+                  <div class="winrate-bar">
+                    <div class="winrate-track"><div class="winrate-fill" style="width:${p.winRate}%"></div></div>
+                    <span class="winrate-text" style="color:${p.winRate >= 50 ? 'var(--neon-green)' : 'var(--neon-red)'}">${p.winRate.toFixed(0)}%</span>
+                  </div>
+                </td>
+                <td class="stat-win">${p.roundsWon}</td>
+                <td class="stat-loss">${p.roundsLost}</td>
+                <td class="${p.roundDiff >= 0 ? 'rd-positive' : 'rd-negative'}">${p.roundDiff >= 0 ? '+' : ''}${p.roundDiff}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="stats-cards-grid">
     <div class="stat-card">
       <div class="stat-card-title">👑 Best Win Rate</div>
       <div class="stat-card-value">${bestPlayer ? bestPlayer.winRate.toFixed(0) + '%' : '-'}</div>
@@ -267,6 +302,7 @@ function renderStats(data, leaderboard) {
             </div>
           `).join('')}
       </div>
+    </div>
     </div>
   `;
 }
