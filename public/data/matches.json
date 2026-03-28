@@ -1,7 +1,7 @@
 {
   "players": [
-    "Caporal",
-    "TheDoarne",
+    "Caporal M. Alessandro Di Lisio",
+    "The Doamne bine",
     "Charlie",
     "Dagles",
     "AKNO"
@@ -29,7 +29,7 @@
             "multiKills": { "2k": 1, "3k": 0, "4k": 0, "5k": 0 }
           },
           {
-            "name": "Caporal",
+            "name": "Caporal M. Alessandro Di Lisio",
             "kills": 31,
             "assists": 5,
             "deaths": 20,
@@ -42,7 +42,7 @@
             "multiKills": { "2k": 10, "3k": 1, "4k": 0, "5k": 0 }
           },
           {
-            "name": "TheDoarne",
+            "name": "The Doamne bine",
             "kills": 21,
             "assists": 8,
             "deaths": 24,
@@ -176,7 +176,7 @@
             "multiKills": { "2k": 0, "3k": 0, "4k": 0, "5k": 0 }
           },
           {
-            "name": "Caporal",
+            "name": "Caporal M. Alessandro Di Lisio",
             "kills": 22,
             "assists": 7,
             "deaths": 21,
@@ -189,7 +189,7 @@
             "multiKills": { "2k": 6, "3k": 1, "4k": 0, "5k": 0 }
           },
           {
-            "name": "TheDoarne",
+            "name": "The Doamne bine",
             "kills": 27,
             "assists": 3,
             "deaths": 17,
