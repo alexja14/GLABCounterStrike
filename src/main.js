@@ -65,7 +65,9 @@ function computeLeaderboard(data) {
     processPlayers(t2.players, t2.score, t1.score, !t1Won && !tie);
   });
 
+  // Only show registered players in the leaderboard
   return Object.values(stats)
+    .filter(s => data.players.includes(s.name))
     .map(s => ({
       ...s,
       total: s.wins + s.losses + s.draws,
@@ -141,6 +143,9 @@ function renderLeaderboardTable(leaderboard) {
           </div>
         </td>
         <td class="${p.roundDiff >= 0 ? 'rd-positive' : 'rd-negative'}">${p.roundDiff >= 0 ? '+' : ''}${p.roundDiff}</td>
+        <td class="stat-win">${p.kills}</td>
+        <td class="stat-neutral">${p.assists}</td>
+        <td class="stat-loss">${p.deaths}</td>
         <td class="stat-neutral">${p.kd}</td>
         <td class="stat-neutral">${p.avgADR ?? '-'}</td>
         <td class="stat-neutral">${p.avgKAST != null ? p.avgKAST + '%' : '-'}</td>
