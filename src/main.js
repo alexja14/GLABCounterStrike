@@ -1,5 +1,11 @@
 import './style.css';
 
+// ===== HELPERS =====
+// Players can be stored as strings (legacy) or objects with full stats
+function playerName(p) {
+  return typeof p === 'string' ? p : p.name;
+}
+
 // ===== DATA LOADING =====
 async function loadMatchData() {
   const res = await fetch(import.meta.env.BASE_URL + 'data/matches.json');
@@ -10,39 +16,67 @@ async function loadMatchData() {
 function computeLeaderboard(data) {
   const stats = {};
 
-  // Init all players
+  // Init all registered players
   data.players.forEach(p => {
-    stats[p] = { name: p, wins: 0, losses: 0, roundsWon: 0, roundsLost: 0 };
+    stats[p] = {
+      name: p, wins: 0, losses: 0, draws: 0,
+      roundsWon: 0, roundsLost: 0,
+      kills: 0, deaths: 0, assists: 0,
+      adr: [], kast: [], hltv: [], matches: 0
+    };
   });
 
   data.matches.forEach(match => {
     const t1 = match.team1;
     const t2 = match.team2;
+    const tie = t1.score === t2.score;
     const t1Won = t1.score > t2.score;
 
-    t1.players.forEach(p => {
-      if (!stats[p]) stats[p] = { name: p, wins: 0, losses: 0, roundsWon: 0, roundsLost: 0 };
-      stats[p].roundsWon += t1.score;
-      stats[p].roundsLost += t2.score;
-      if (t1Won) stats[p].wins++;
-      else stats[p].losses++;
-    });
+    const processPlayers = (teamPlayers, teamScore, oppScore, teamWon) => {
+      teamPlayers.forEach(p => {
+        const name = playerName(p);
+        if (!stats[name]) stats[name] = {
+          name, wins: 0, losses: 0, draws: 0,
+          roundsWon: 0, roundsLost: 0,
+          kills: 0, deaths: 0, assists: 0,
+          adr: [], kast: [], hltv: [], matches: 0
+        };
+        const s = stats[name];
+        s.roundsWon += teamScore;
+        s.roundsLost += oppScore;
+        s.matches++;
+        if (tie) s.draws++;
+        else if (teamWon) s.wins++;
+        else s.losses++;
 
-    t2.players.forEach(p => {
-      if (!stats[p]) stats[p] = { name: p, wins: 0, losses: 0, roundsWon: 0, roundsLost: 0 };
-      stats[p].roundsWon += t2.score;
-      stats[p].roundsLost += t1.score;
-      if (!t1Won) stats[p].wins++;
-      else stats[p].losses++;
-    });
+        // Accumulate per-match stats if available
+        if (typeof p === 'object') {
+          if (p.kills   != null) s.kills   += p.kills;
+          if (p.deaths  != null) s.deaths  += p.deaths;
+          if (p.assists != null) s.assists += p.assists;
+          if (p.adr     != null) s.adr.push(p.adr);
+          if (p.kast    != null) s.kast.push(p.kast);
+          if (p.hltv    != null) s.hltv.push(p.hltv);
+        }
+      });
+    };
+
+    processPlayers(t1.players, t1.score, t2.score, t1Won && !tie);
+    processPlayers(t2.players, t2.score, t1.score, !t1Won && !tie);
   });
 
   return Object.values(stats)
     .map(s => ({
       ...s,
-      total: s.wins + s.losses,
-      winRate: s.wins + s.losses > 0 ? (s.wins / (s.wins + s.losses)) * 100 : 0,
+      total: s.wins + s.losses + s.draws,
+      winRate: (s.wins + s.losses + s.draws) > 0
+        ? (s.wins / (s.wins + s.losses + s.draws)) * 100
+        : 0,
       roundDiff: s.roundsWon - s.roundsLost,
+      avgADR:  s.adr.length  ? (s.adr.reduce((a,b)=>a+b,0)  / s.adr.length).toFixed(0)  : null,
+      avgKAST: s.kast.length ? (s.kast.reduce((a,b)=>a+b,0) / s.kast.length).toFixed(0) : null,
+      avgHLTV: s.hltv.length ? (s.hltv.reduce((a,b)=>a+b,0) / s.hltv.length).toFixed(2) : null,
+      kd: s.deaths > 0 ? (s.kills / s.deaths).toFixed(2) : s.kills > 0 ? '∞' : '-',
     }))
     .sort((a, b) => {
       if (b.winRate !== a.winRate) return b.winRate - a.winRate;
@@ -70,7 +104,8 @@ function renderPodium(leaderboard) {
       <div>
         <div class="podium-name">${p.name}</div>
         <div class="podium-winrate">${p.winRate.toFixed(0)}% Win Rate</div>
-        <div class="podium-record">${p.wins}W &ndash; ${p.losses}L</div>
+        <div class="podium-record">${p.wins}W &ndash; ${p.draws}D &ndash; ${p.losses}L</div>
+        ${p.avgHLTV ? `<div class="podium-hltv">HLTV ${p.avgHLTV}</div>` : ''}
       </div>
     </div>
   `).join('');
@@ -92,6 +127,7 @@ function renderLeaderboardTable(leaderboard) {
         <td>${posDisplay}</td>
         <td class="player-name">${p.name}</td>
         <td class="stat-win">${p.wins}</td>
+        <td style="color:var(--text-muted);font-weight:700">${p.draws}</td>
         <td class="stat-loss">${p.losses}</td>
         <td class="stat-neutral">${p.total}</td>
         <td>
@@ -104,11 +140,11 @@ function renderLeaderboardTable(leaderboard) {
             </span>
           </div>
         </td>
-        <td class="stat-win">${p.roundsWon}</td>
-        <td class="stat-loss">${p.roundsLost}</td>
-        <td class="${p.roundDiff >= 0 ? 'rd-positive' : 'rd-negative'}">
-          ${p.roundDiff >= 0 ? '+' : ''}${p.roundDiff}
-        </td>
+        <td class="${p.roundDiff >= 0 ? 'rd-positive' : 'rd-negative'}">${p.roundDiff >= 0 ? '+' : ''}${p.roundDiff}</td>
+        <td class="stat-neutral">${p.kd}</td>
+        <td class="stat-neutral">${p.avgADR ?? '-'}</td>
+        <td class="stat-neutral">${p.avgKAST != null ? p.avgKAST + '%' : '-'}</td>
+        <td class="${p.avgHLTV >= 1 ? 'rd-positive' : 'stat-neutral'}">${p.avgHLTV ?? '-'}</td>
       </tr>
     `;
   }).join('');
@@ -128,6 +164,63 @@ function renderGlobalStats(data) {
   `;
 }
 
+// ===== RENDERING: MATCH PLAYER STATS TABLE =====
+function renderPlayerStatsTable(players, highlightNames) {
+  // Check if any player has detailed stats
+  const hasStats = players.some(p => typeof p === 'object' && p.kills != null);
+
+  if (!hasStats) {
+    return players.map(p => `<div class="team-player-name">${playerName(p)}</div>`).join('');
+  }
+
+  return `
+    <div class="match-stats-table-wrapper">
+      <table class="match-stats-table">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>K</th>
+            <th>A</th>
+            <th>D</th>
+            <th>K/D</th>
+            <th>ADR</th>
+            <th>KAST</th>
+            <th>HLTV</th>
+            <th>Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${players.map(p => {
+            const name = playerName(p);
+            const isRegistered = highlightNames.includes(name);
+            const kd = typeof p === 'object' && p.deaths > 0
+              ? (p.kills / p.deaths).toFixed(2)
+              : typeof p === 'object' && p.kd != null ? p.kd : '-';
+            const ratingVal = typeof p === 'object' && p.rating != null ? p.rating : null;
+            const ratingColor = ratingVal != null
+              ? (ratingVal >= 0 ? 'var(--neon-green)' : 'var(--neon-red)')
+              : 'var(--text-secondary)';
+
+            return `
+              <tr class="${isRegistered ? 'registered-player' : ''}">
+                <td class="ms-name">${isRegistered ? `<span class="glab-dot"></span>` : ''}${name}</td>
+                <td class="ms-kill">${typeof p === 'object' && p.kills != null ? p.kills : '-'}</td>
+                <td class="ms-assist">${typeof p === 'object' && p.assists != null ? p.assists : '-'}</td>
+                <td class="ms-death">${typeof p === 'object' && p.deaths != null ? p.deaths : '-'}</td>
+                <td class="${typeof p === 'object' && p.kd >= 1 ? 'ms-kd-pos' : 'ms-kd-neg'}">${typeof p === 'object' && p.kd != null ? p.kd : kd}</td>
+                <td>${typeof p === 'object' && p.adr != null ? p.adr : '-'}</td>
+                <td>${typeof p === 'object' && p.kast != null ? p.kast + '%' : '-'}</td>
+                <td class="${typeof p === 'object' && p.hltv >= 1 ? 'ms-hltv-pos' : ''}">${typeof p === 'object' && p.hltv != null ? p.hltv : '-'}</td>
+                <td style="color:${ratingColor};font-weight:700">${ratingVal != null ? (ratingVal >= 0 ? '+' : '') + ratingVal.toFixed(2) : '-'}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 // ===== RENDERING: MATCHES =====
 function renderMatches(data) {
   const container = document.getElementById('matches-list');
@@ -137,43 +230,48 @@ function renderMatches(data) {
     return;
   }
 
-  // Show most recent first
   const sorted = [...data.matches].sort((a, b) => new Date(b.date) - new Date(a.date));
 
   container.innerHTML = sorted.map(match => {
     const t1Won = match.team1.score > match.team2.score;
+    const isTie = match.team1.score === match.team2.score;
 
-    const formatDate = (d) => {
-      const date = new Date(d);
-      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    };
+    const formatDate = d =>
+      new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    const resultLabel = isTie ? 'TIE' : t1Won ? 'WIN' : 'LOSS';
+    const resultClass = isTie ? 'result-tie' : t1Won ? 'result-win' : 'result-loss';
 
     return `
-      <div class="match-card">
+      <div class="match-card match-card-full">
         <div class="match-meta">
-          <span class="match-date">${formatDate(match.date)}</span>
-          <span class="match-map">${match.map}</span>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="match-date">${formatDate(match.date)}</span>
+            <span class="match-map">${match.map}</span>
+          </div>
+          <span class="match-result-badge ${resultClass}">${resultLabel}</span>
         </div>
+
         <div class="match-score-area">
           <div class="team-block">
             <div class="team-name">${match.team1.name}</div>
-            <div class="team-score ${t1Won ? 'winner' : 'loser'}">${match.team1.score}</div>
+            <div class="team-score ${isTie ? 'tie' : t1Won ? 'winner' : 'loser'}">${match.team1.score}</div>
           </div>
           <div class="score-divider">vs</div>
           <div class="team-block">
             <div class="team-name">${match.team2.name}</div>
-            <div class="team-score ${!t1Won ? 'winner' : 'loser'}">${match.team2.score}</div>
+            <div class="team-score ${isTie ? 'tie' : !t1Won ? 'winner' : 'loser'}">${match.team2.score}</div>
           </div>
         </div>
-        <div class="match-players">
-          <div class="team-players">
-            <div class="team-players-label">${match.team1.name}</div>
-            ${match.team1.players.map(p => `<div class="team-player-name">${p}</div>`).join('')}
-          </div>
-          <div class="team-players" style="text-align:right">
-            <div class="team-players-label">${match.team2.name}</div>
-            ${match.team2.players.map(p => `<div class="team-player-name">${p}</div>`).join('')}
-          </div>
+
+        <div class="match-team-section">
+          <div class="match-team-label team-label-glab">${match.team1.name}</div>
+          ${renderPlayerStatsTable(match.team1.players, data.players)}
+        </div>
+
+        <div class="match-team-section" style="margin-top:1rem">
+          <div class="match-team-label team-label-enemy">${match.team2.name}</div>
+          ${renderPlayerStatsTable(match.team2.players, data.players)}
         </div>
       </div>
     `;
@@ -189,38 +287,32 @@ function renderStats(data, leaderboard) {
     return;
   }
 
-  // Map frequency
   const mapCount = {};
-  data.matches.forEach(m => {
-    mapCount[m.map] = (mapCount[m.map] || 0) + 1;
-  });
+  data.matches.forEach(m => { mapCount[m.map] = (mapCount[m.map] || 0) + 1; });
   const maxMapCount = Math.max(...Object.values(mapCount));
 
-  // Best winrate
   const bestPlayer = leaderboard.filter(p => p.total > 0)[0];
-  // Most matches
   const mostMatches = [...leaderboard].sort((a, b) => b.total - a.total)[0];
-  // Best round diff
   const bestRD = [...leaderboard].sort((a, b) => b.roundDiff - a.roundDiff)[0];
-  // Total rounds
+  const bestHLTV = [...leaderboard].filter(p => p.avgHLTV != null).sort((a, b) => b.avgHLTV - a.avgHLTV)[0];
   const totalRounds = data.matches.reduce((acc, m) => acc + m.team1.score + m.team2.score, 0);
-  // Avg rounds per match
   const avgRounds = data.matches.length > 0 ? (totalRounds / data.matches.length).toFixed(1) : 0;
 
-  // Streak calc
   const playerStreaks = {};
   const sortedMatches = [...data.matches].sort((a, b) => new Date(a.date) - new Date(b.date));
   sortedMatches.forEach(m => {
     const t1Won = m.team1.score > m.team2.score;
+    const isTie = m.team1.score === m.team2.score;
     [...m.team1.players, ...m.team2.players].forEach(p => {
-      if (!playerStreaks[p]) playerStreaks[p] = { current: 0, best: 0 };
-      const isTeam1 = m.team1.players.includes(p);
-      const won = isTeam1 ? t1Won : !t1Won;
+      const name = playerName(p);
+      if (!playerStreaks[name]) playerStreaks[name] = { current: 0, best: 0 };
+      const isTeam1 = m.team1.players.map(playerName).includes(name);
+      const won = isTie ? false : (isTeam1 ? t1Won : !t1Won);
       if (won) {
-        playerStreaks[p].current++;
-        playerStreaks[p].best = Math.max(playerStreaks[p].best, playerStreaks[p].current);
+        playerStreaks[name].current++;
+        playerStreaks[name].best = Math.max(playerStreaks[name].best, playerStreaks[name].current);
       } else {
-        playerStreaks[p].current = 0;
+        playerStreaks[name].current = 0;
       }
     });
   });
@@ -233,7 +325,7 @@ function renderStats(data, leaderboard) {
         <table>
           <thead>
             <tr>
-              <th>Pos</th><th>Player</th><th>W</th><th>L</th><th>GP</th><th>Win%</th><th>Round W</th><th>Round L</th><th>RD</th>
+              <th>Pos</th><th>Player</th><th>W</th><th>D</th><th>L</th><th>GP</th><th>Win%</th><th>RD</th><th>K/D</th><th>ADR</th><th>KAST</th><th>HLTV</th>
             </tr>
           </thead>
           <tbody>
@@ -244,6 +336,7 @@ function renderStats(data, leaderboard) {
                 <td style="text-align:center;font-family:var(--font-display);font-weight:700;color:var(--text-muted)">${posDisplay}</td>
                 <td class="player-name">${p.name}</td>
                 <td class="stat-win">${p.wins}</td>
+                <td style="color:var(--text-muted);font-weight:700">${p.draws}</td>
                 <td class="stat-loss">${p.losses}</td>
                 <td class="stat-neutral">${p.total}</td>
                 <td>
@@ -252,9 +345,11 @@ function renderStats(data, leaderboard) {
                     <span class="winrate-text" style="color:${p.winRate >= 50 ? 'var(--neon-green)' : 'var(--neon-red)'}">${p.winRate.toFixed(0)}%</span>
                   </div>
                 </td>
-                <td class="stat-win">${p.roundsWon}</td>
-                <td class="stat-loss">${p.roundsLost}</td>
                 <td class="${p.roundDiff >= 0 ? 'rd-positive' : 'rd-negative'}">${p.roundDiff >= 0 ? '+' : ''}${p.roundDiff}</td>
+                <td class="stat-neutral">${p.kd}</td>
+                <td class="stat-neutral">${p.avgADR ?? '-'}</td>
+                <td class="stat-neutral">${p.avgKAST != null ? p.avgKAST + '%' : '-'}</td>
+                <td class="${p.avgHLTV >= 1 ? 'rd-positive' : 'stat-neutral'}">${p.avgHLTV ?? '-'}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -266,6 +361,11 @@ function renderStats(data, leaderboard) {
       <div class="stat-card-title">👑 Best Win Rate</div>
       <div class="stat-card-value">${bestPlayer ? bestPlayer.winRate.toFixed(0) + '%' : '-'}</div>
       <div class="stat-card-sub">${bestPlayer ? bestPlayer.name + ' (' + bestPlayer.wins + 'W-' + bestPlayer.losses + 'L)' : ''}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-title">🎯 Best HLTV Rating</div>
+      <div class="stat-card-value">${bestHLTV ? bestHLTV.avgHLTV : '-'}</div>
+      <div class="stat-card-sub">${bestHLTV ? bestHLTV.name : ''}</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-title">🔥 Best Win Streak</div>
@@ -281,11 +381,6 @@ function renderStats(data, leaderboard) {
       <div class="stat-card-title">⚡ Best Round Diff</div>
       <div class="stat-card-value">${bestRD ? (bestRD.roundDiff >= 0 ? '+' : '') + bestRD.roundDiff : '-'}</div>
       <div class="stat-card-sub">${bestRD ? bestRD.name : ''}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card-title">🎮 Most Matches Played</div>
-      <div class="stat-card-value">${mostMatches ? mostMatches.total : '-'}</div>
-      <div class="stat-card-sub">${mostMatches ? mostMatches.name : ''}</div>
     </div>
     <div class="stat-card">
       <div class="stat-card-title">🗺️ Maps Played</div>
@@ -315,15 +410,11 @@ function initNavigation() {
   buttons.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.section;
-
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       sections.forEach(s => {
         s.classList.remove('active');
-        if (s.id === `section-${target}`) {
-          s.classList.add('active');
-        }
+        if (s.id === `section-${target}`) s.classList.add('active');
       });
     });
   });

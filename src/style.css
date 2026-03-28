@@ -355,7 +355,7 @@ main {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 650px;
+  min-width: 750px;
 }
 
 thead tr {
@@ -462,6 +462,12 @@ tbody tr:hover {
 .matches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.matches-list {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
@@ -695,6 +701,143 @@ tbody tr:hover {
   color: var(--text-primary);
   min-width: 24px;
   text-align: right;
+}
+
+/* ===== MATCH RESULT BADGE ===== */
+.match-card-full {
+  max-width: 100%;
+}
+
+.match-result-badge {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  padding: 4px 14px;
+  border-radius: 100px;
+}
+
+.result-win {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--neon-green);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.result-loss {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--neon-red);
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
+.result-tie {
+  background: rgba(250, 204, 21, 0.12);
+  color: var(--neon-yellow);
+  border: 1px solid rgba(250, 204, 21, 0.25);
+}
+
+.team-score.tie {
+  color: var(--neon-yellow);
+  text-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+}
+
+/* ===== MATCH TEAM SECTION ===== */
+.match-team-section {
+  margin-top: 1.2rem;
+}
+
+.match-team-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.team-label-glab  { color: var(--neon-cyan); }
+.team-label-enemy { color: var(--neon-red); }
+
+/* ===== MATCH STATS TABLE ===== */
+.match-stats-table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(10, 14, 23, 0.5);
+}
+
+.match-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 520px;
+  font-size: 0.85rem;
+}
+
+.match-stats-table thead tr {
+  background: rgba(56, 189, 248, 0.06);
+}
+
+.match-stats-table th {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.match-stats-table td {
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border-top: 1px solid rgba(56, 189, 248, 0.05);
+  white-space: nowrap;
+}
+
+.match-stats-table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.05);
+}
+
+.match-stats-table tr.registered-player {
+  background: rgba(56, 189, 248, 0.04);
+}
+
+.match-stats-table tr.registered-player td:first-child {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.ms-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+}
+
+.glab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-cyan);
+  box-shadow: 0 0 6px var(--neon-cyan);
+  flex-shrink: 0;
+}
+
+.ms-kill   { color: var(--neon-green); font-weight: 700; }
+.ms-assist { color: var(--neon-cyan); }
+.ms-death  { color: var(--neon-red); }
+.ms-kd-pos { color: var(--neon-green); font-weight: 700; }
+.ms-kd-neg { color: var(--neon-red); }
+.ms-hltv-pos { color: var(--neon-green); font-weight: 700; }
+
+/* ===== PODIUM HLTV ===== */
+.podium-hltv {
+  font-size: 0.75rem;
+  color: var(--neon-cyan);
+  margin-top: 2px;
+  font-weight: 600;
 }
 
 /* ===== FOOTER ===== */
