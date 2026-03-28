@@ -81,9 +81,21 @@ function computeLeaderboard(data) {
       kd: s.deaths > 0 ? (s.kills / s.deaths).toFixed(2) : s.kills > 0 ? '∞' : '-',
     }))
     .sort((a, b) => {
-      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
-      if (b.roundDiff !== a.roundDiff) return b.roundDiff - a.roundDiff;
-      return b.wins - a.wins;
+      // Players with no games always go last
+      if (a.total === 0 && b.total === 0) return 0;
+      if (a.total === 0) return 1;
+      if (b.total === 0) return -1;
+
+      // Primary sort: wins
+      if (b.wins !== a.wins) return b.wins - a.wins;
+
+      // Tiebreaker: composite performance score
+      // HLTV rating is the most complete indicator, then K/D, then ADR, then round diff
+      const perf = p => (parseFloat(p.avgHLTV) || 0) * 3
+                      + (parseFloat(p.kd) || 0) * 2
+                      + (parseFloat(p.avgADR) || 0) / 50
+                      + p.roundDiff / 10;
+      return perf(b) - perf(a);
     });
 }
 
